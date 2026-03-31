@@ -273,35 +273,28 @@ class TestMedLeafXLoader:
 
 
 class TestCIMPDLoader:
-    """Test load_cimpd — species/{Healthy,Unhealthy} layout."""
+    """Test load_cimpd — folder-per-species layout (23 species, no pathology labels)."""
 
-    def test_health_subfolder_layout(self, tmp_path: Path) -> None:
+    def test_basic_layout(self, tmp_path: Path) -> None:
         root = tmp_path / "cimpd"
-        for species in ["Tulsi", "Aloe_Vera"]:
-            for health in ["Healthy", "Unhealthy"]:
-                for i in range(3):
-                    _make_image(root / species / health / f"img_{i}.jpg")
+        for species in ["Tulsi", "Aloe_Vera", "Neem"]:
+            for i in range(4):
+                _make_image(root / species / f"img_{i}.jpg")
         samples = load_cimpd(root)
         assert len(samples) == 12
-        conditions = {s[2] for s in samples}
-        assert "Healthy" in conditions
-        assert "Unhealthy" in conditions
-
-    def test_flat_layout(self, tmp_path: Path) -> None:
-        root = tmp_path / "cimpd"
-        for i in range(5):
-            _make_image(root / "Mint" / f"img_{i}.jpg")
-        samples = load_cimpd(root)
-        assert len(samples) == 5
         assert all(s[2] is None for s in samples)
+        species = {s[1] for s in samples}
+        assert species == {"Tulsi", "Aloe_Vera", "Neem"}
 
-    def test_split_layout(self, tmp_path: Path) -> None:
+    def test_nonexistent_root(self, tmp_path: Path) -> None:
+        assert load_cimpd(tmp_path / "nope") == []
+
+    def test_skips_hidden_dirs(self, tmp_path: Path) -> None:
         root = tmp_path / "cimpd"
-        for split in ["train", "test"]:
-            _make_image(root / "Tulsi" / split / "Healthy" / "img.jpg")
-            _make_image(root / "Tulsi" / split / "Unhealthy" / "img.jpg")
+        _make_image(root / ".hidden" / "img.jpg")
+        _make_image(root / "Tulsi" / "img.jpg")
         samples = load_cimpd(root)
-        assert len(samples) == 4
+        assert len(samples) == 1
 
 
 class TestSIMPLoader:

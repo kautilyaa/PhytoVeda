@@ -4,7 +4,7 @@ Sources:
     - Herbify: GitHub (Phantom-fs/Herbify-Dataset)
     - Assam (MED117): Mendeley Data (dtvbwrhznz/4)
     - AI-MedLeafX: Mendeley Data (zz7r5y4dc6/1)
-    - CIMPD: Kaggle (cimpd dataset)
+    - CIMPD: Kaggle (satyamtomar08/indian-medicinal-plant-dataset)
     - SIMPD V1 (South Indian Medicinal Plants): Mendeley
       https://data.mendeley.com/datasets/9d89vjcghv/2
     - EarlyNSD: Kaggle (raiaone/early-nutrient-stress-detection-of-plants)
@@ -14,6 +14,9 @@ from __future__ import annotations
 
 import subprocess
 import sys
+import tempfile
+import urllib.request
+import zipfile
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -55,11 +58,11 @@ DATASET_SOURCES: dict[str, DatasetSource] = {
         ),
     ),
     "cimpd": DatasetSource(
-        name="CIMPD",
+        name="CIMPD (Central India Medicinal Plant Dataset)",
         platform="kaggle",
-        identifier="cimpd-central-india-medicinal-plant",
+        identifier="satyamtomar08/indian-medicinal-plant-dataset",
         expected_images=9_130,
-        description="23 species, Healthy/Unhealthy labels, unconstrained smartphone capture",
+        description="23 species from Gwalior region, leaf images for species classification",
     ),
     "simp": DatasetSource(
         name="SIMPD V1 (South Indian Medicinal Plants)",
@@ -127,18 +130,36 @@ def validate_all(data_root: Path) -> dict[str, tuple[bool, str]]:
 def download_kaggle(identifier: str, output_dir: Path) -> None:
     """Download a dataset from Kaggle using the kaggle CLI.
 
-    Requires: pip install kaggle && kaggle API key configured.
+    Requires: ``pip install kaggle`` and a Kaggle API key configured
+    (``~/.kaggle/kaggle.json``).
+
+    Raises:
+        RuntimeError: If the kaggle CLI is missing or the download fails.
     """
     output_dir.mkdir(parents=True, exist_ok=True)
-    subprocess.run(
-        [
-            sys.executable, "-m", "kaggle", "datasets", "download",
-            "-d", identifier,
-            "-p", str(output_dir),
-            "--unzip",
-        ],
-        check=True,
-    )
+    try:
+        subprocess.run(
+            [
+                sys.executable, "-m", "kaggle", "datasets", "download",
+                "-d", identifier,
+                "-p", str(output_dir),
+                "--unzip",
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except FileNotFoundError as exc:
+        raise RuntimeError(
+            "Kaggle CLI not found. Install with: pip install kaggle"
+        ) from exc
+    except subprocess.CalledProcessError as exc:
+        raise RuntimeError(
+            f"Kaggle download failed for '{identifier}'.\n"
+            f"  stderr: {exc.stderr.strip()}\n"
+            f"  Ensure the identifier is 'username/dataset-slug' format "
+            f"and your Kaggle API key is configured."
+        ) from exc
 
 
 def download_github(repo: str, output_dir: Path) -> None:
@@ -152,40 +173,90 @@ def download_github(repo: str, output_dir: Path) -> None:
 
 
 def download_mendeley(identifier: str, output_dir: Path) -> None:
-    """Download from Mendeley Data.
+    """Download from Mendeley Data via the public ZIP endpoint.
 
-    Mendeley datasets don't have a standard CLI — prints instructions
-    for manual download, or uses the Mendeley Data API if available.
+    Tries the Mendeley S3 cache first (fastest), then the API zip endpoint.
+    Falls back to printing manual instructions if both fail.
+
+    Args:
+        identifier: Mendeley dataset ID in ``{id}/{version}`` format
+                    (e.g. ``dtvbwrhznz/4``).
+        output_dir: Directory to extract the dataset into.
     """
     output_dir.mkdir(parents=True, exist_ok=True)
+    dataset_id, _, version = identifier.partition("/")
+    version = version or "1"
+
+    # Ordered list of download URL patterns to try
+    zip_urls = [
+        (
+            "S3 cache",
+            f"https://prod-dcd-datasets-cache-zipfiles.s3.eu-west-1.amazonaws.com/{dataset_id}-{version}.zip",
+        ),
+        (
+            "Mendeley API",
+            f"https://data.mendeley.com/api/datasets-v2/datasets/{dataset_id}/zip?version={version}",
+        ),
+    ]
+
+    for label, url in zip_urls:
+        try:
+            print(f"  Trying {label} download...")
+            with tempfile.NamedTemporaryFile(suffix=".zip", delete=False) as tmp:
+                tmp_path = Path(tmp.name)
+            urllib.request.urlretrieve(url, tmp_path)  # noqa: S310
+            # Verify it's a valid zip
+            if not zipfile.is_zipfile(tmp_path):
+                tmp_path.unlink(missing_ok=True)
+                print(f"  {label}: response was not a valid ZIP, skipping")
+                continue
+            with zipfile.ZipFile(tmp_path, "r") as zf:
+                zf.extractall(output_dir)
+            tmp_path.unlink(missing_ok=True)
+            print(f"  Downloaded and extracted via {label}")
+            return
+        except (urllib.error.URLError, OSError, zipfile.BadZipFile) as exc:
+            tmp_path.unlink(missing_ok=True)
+            print(f"  {label} failed: {exc}")
+
+    # All attempts failed — fall back to manual instructions
     mendeley_url = f"https://data.mendeley.com/datasets/{identifier}"
     print(
-        f"Mendeley dataset: {identifier}\n"
-        f"Please download manually from: {mendeley_url}\n"
-        f"Extract contents to: {output_dir}\n"
+        f"  Automatic download failed. Please download manually:\n"
+        f"    {mendeley_url}\n"
+        f"  Extract contents to: {output_dir}\n"
     )
 
 
-def download_dataset(data_root: Path, dataset_key: str) -> None:
-    """Download a single dataset to data_root/<dataset_key>/."""
+def download_dataset(data_root: Path, dataset_key: str) -> bool:
+    """Download a single dataset to ``data_root/<dataset_key>/``.
+
+    Returns:
+        ``True`` if the dataset was downloaded (or already present) and valid.
+    """
     source = DATASET_SOURCES[dataset_key]
     output_dir = data_root / dataset_key
 
     if output_dir.exists() and count_images(output_dir) > 0:
         print(f"  {source.name}: already exists with {count_images(output_dir)} images, skipping")
-        return
+        return True
 
     print(f"  Downloading {source.name} from {source.platform}...")
 
-    if source.platform == "kaggle":
-        download_kaggle(source.identifier, output_dir)
-    elif source.platform == "github":
-        download_github(source.identifier, output_dir)
-    elif source.platform == "mendeley":
-        download_mendeley(source.identifier, output_dir)
+    try:
+        if source.platform == "kaggle":
+            download_kaggle(source.identifier, output_dir)
+        elif source.platform == "github":
+            download_github(source.identifier, output_dir)
+        elif source.platform == "mendeley":
+            download_mendeley(source.identifier, output_dir)
+    except (RuntimeError, OSError) as exc:
+        print(f"  ERROR downloading {source.name}: {exc}")
+        return False
 
     is_valid, msg = validate_dataset(data_root, dataset_key)
     print(f"  {msg}")
+    return is_valid
 
 
 def download_all(data_root: str | Path) -> None:

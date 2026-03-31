@@ -7,7 +7,7 @@ Datasets:
     - Herbify: 6,104 images, 91 species — folder-per-species
     - Assam (MED117): 7,341 images, 10 classes — folder-per-species
     - AI-MedLeafX: 10,858 orig, 4 species — species/condition folders
-    - CIMPD: 9,130 images, 23 species — species/{Healthy,Unhealthy} folders
+    - CIMPD: 9,130 images, 23 species — folder-per-species
     - SIMPD V1 (simp/): 2,503 images, 20 species — folder-per-species;
       Mendeley https://data.mendeley.com/datasets/9d89vjcghv/2
     - EarlyNSD: 2,700 images, 9 classes — crop_condition folders
@@ -129,47 +129,21 @@ def load_medleafx(root: Path) -> list[tuple[Path, str, str | None]]:
 
 
 def load_cimpd(root: Path) -> list[tuple[Path, str, str | None]]:
-    """CIMPD: data/cimpd/<species>/{Healthy,Unhealthy}/*.jpg
+    """CIMPD: data/cimpd/<species_name>/*.jpg — folder-per-species, no pathology labels.
 
-    Or flat: data/cimpd/<species>/*.jpg with train/test/val splits.
-    Handles both layouts.
+    Source: https://www.kaggle.com/datasets/satyamtomar08/indian-medicinal-plant-dataset
+    23 medicinal plant species from Central India (Gwalior region).
     """
     samples = []
     if not root.exists():
         return samples
-
     for species_dir in sorted(root.iterdir()):
         if not species_dir.is_dir() or species_dir.name.startswith("."):
             continue
-
         species_name = species_dir.name
-        subdirs = [d for d in species_dir.iterdir() if d.is_dir()]
-        health_dirs = {d.name.lower(): d for d in subdirs}
-
-        if "healthy" in health_dirs or "unhealthy" in health_dirs:
-            # Has health subfolders
-            for subdir in subdirs:
-                condition = subdir.name  # "Healthy" or "Unhealthy"
-                for img in subdir.rglob("*"):
-                    if _is_image(img):
-                        samples.append((img, species_name, condition))
-        elif any(d.name.lower() in ("train", "test", "val", "validation") for d in subdirs):
-            # Has split subfolders — recurse into them
-            for split_dir in subdirs:
-                for item in sorted(split_dir.iterdir()):
-                    if item.is_dir():
-                        # split/species or split/condition
-                        for img in item.rglob("*"):
-                            if _is_image(img):
-                                samples.append((img, species_name, item.name))
-                    elif _is_image(item):
-                        samples.append((item, species_name, None))
-        else:
-            # Flat images under species folder
-            for img in species_dir.rglob("*"):
-                if _is_image(img):
-                    samples.append((img, species_name, None))
-
+        for img in species_dir.rglob("*"):
+            if _is_image(img):
+                samples.append((img, species_name, None))
     return samples
 
 
