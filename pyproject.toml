@@ -7,7 +7,7 @@ name = "phytoveda"
 version = "0.1.0"
 description = "Multimodal Pharmacognosy: AI-Driven Botanical Identification and Textual Mapping in Ayurveda"
 readme = "README.md"
-license = { text = "MIT" }
+license = {text = "MIT"}
 requires-python = ">=3.11"
 authors = [
     { name = "Arunbh Yashaswi" },
