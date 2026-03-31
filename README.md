@@ -287,7 +287,7 @@ oracle = LLMOracle(provider="llama")
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/PhytoVeda.git
+git clone https://github.com/kautilyaa/PhytoVeda.git
 cd PhytoVeda
 
 # Install core package

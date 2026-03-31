@@ -10,8 +10,13 @@ readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.14"
 authors = [
-    { name = "Arun Bhyashaswi" },
+    { name = "Arunbh Yashaswi" },
 ]
+
+[project.urls]
+Homepage = "https://github.com/kautilyaa/PhytoVeda"
+Repository = "https://github.com/kautilyaa/PhytoVeda"
+Issues = "https://github.com/kautilyaa/PhytoVeda/issues"
 dependencies = [
     # Deep Learning
     "torch>=2.6.0",
