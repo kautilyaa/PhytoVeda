@@ -1,0 +1,88 @@
+# Vrikshayurveda Traditional Therapeutic Interventions
+# Mapped from Dosha diagnosis to treatment protocols
+
+vataja_vyadhi:
+  dosha: "Vata"
+  description: "Imbalance caused by excess Vata — dryness, deformation, desiccation"
+  cv_indicators:
+    - "Edge deformation and geometric irregularities"
+    - "Texture variance and roughness (desiccation)"
+    - "Structural asymmetry in leaf morphology"
+    - "Severe curling of leaf margins"
+  classical_symptoms:
+    - "Plant becomes lean with severe geometrical deformations"
+    - "Anomalous knots and globules appear on trunks or leaves"
+    - "Rapid desiccation and drying of branches"
+    - "Fruits abnormally hard with reduced sap and juice"
+  treatments:
+    primary:
+      - name: "Kunapajala Application"
+        description: "Irrigate with Kunapajala — a highly potent traditional liquid organic fermented manure for intense nourishment"
+      - name: "Neem Fumigation"
+        description: "Localized fumigation using Azadirachta indica (Neem) leaves to restore vitality and ward off pests"
+    secondary:
+      - name: "Nutrient-Dense Irrigation"
+        description: "Apply animal-derived fats and nutrient-dense formulations to replenish sap"
+  contraindications:
+    - "Avoid further drying treatments"
+    - "Do not reduce moisture or irrigation"
+
+pittaja_vyadhi:
+  dosha: "Pitta"
+  description: "Imbalance caused by excess Pitta — thermal and metabolic distress"
+  cv_indicators:
+    - "RGB/HSV colorimetric shifts indicating chlorosis"
+    - "Localized necrotic lesions and burn artifacts"
+    - "Severe chlorotic patterns (yellowing)"
+    - "Premature discoloration of foliage"
+  classical_symptoms:
+    - "Inability to withstand solar radiation"
+    - "Profound yellowing (chlorosis) of leaves"
+    - "Premature shedding of foliage and branches"
+    - "Rapid rotting of fruits before ripening"
+    - "Overall systemic paleness"
+  treatments:
+    primary:
+      - name: "Yashtimadhu Decoction"
+        description: "Root irrigation with sweet cooling Glycyrrhiza glabra (Licorice/Yashtimadhu) decoction"
+      - name: "Madhuca Indica Decoction"
+        description: "Apply Madhuca indica decoction for cooling pacification"
+    secondary:
+      - name: "Milk and Honey Application"
+        description: "Apply milk mixed with honey to the soil for cooling effect"
+      - name: "Triphala Spray"
+        description: "Spray cooling Triphala decoction on foliage"
+  contraindications:
+    - "Avoid heating interventions"
+    - "Do not expose to direct intense sunlight"
+    - "Avoid pungent or hot fertilizers"
+
+kaphaja_vyadhi:
+  dosha: "Kapha"
+  description: "Imbalance caused by excess Kapha — moisture excess and stagnation"
+  cv_indicators:
+    - "Morphological thickening of leaves"
+    - "Surface dullness and white powdery deposits"
+    - "Abnormal Leaf Area Index (LAI)"
+    - "Excessive but irregular growth patterns"
+  classical_symptoms:
+    - "Hypertrophic but severely deformed leaves"
+    - "Delayed and abnormally prolonged bearing of fruits"
+    - "Dwarfed overall growth"
+    - "Loss of natural olfactory and gustatory profiles (medicinal potency ruined)"
+    - "Paleness without the desiccation seen in Vata"
+  treatments:
+    primary:
+      - name: "Panchamoola Decoction"
+        description: "Soil treatment with bitter, astringent Panchamoola (five root) decoction"
+      - name: "Mustard Application"
+        description: "Apply mustard-based formulations for heating and drying effect"
+    secondary:
+      - name: "Moisture Reduction"
+        description: "Strictly reduce ambient moisture around the plant"
+      - name: "Avoid Sweet/Oily Fertilizers"
+        description: "Stop applying overly sweet, oily, or cold substances to soil"
+  contraindications:
+    - "Avoid sweet, oily, or cold fertilizers"
+    - "Do not increase watering frequency"
+    - "Avoid heavy mulching that retains moisture"

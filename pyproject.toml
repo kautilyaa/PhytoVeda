@@ -1,0 +1,119 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "phytoveda"
+version = "0.1.0"
+description = "Multimodal Pharmacognosy: AI-Driven Botanical Identification and Textual Mapping in Ayurveda"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.14"
+authors = [
+    { name = "Arun Bhyashaswi" },
+]
+dependencies = [
+    # Deep Learning
+    "torch>=2.6.0",
+    "torchvision>=0.21.0",
+    "timm>=1.0.0",
+    "transformers>=4.50.0",
+
+    # Data Processing
+    "numpy>=2.2.0",
+    "Pillow>=11.0.0",
+    "scikit-learn>=1.6.0",
+    "pandas>=2.2.0",
+
+    # Augmentation
+    "albumentations>=2.0.0",
+
+    # Google Cloud
+    "google-cloud-storage>=2.19.0",
+    "google-cloud-aiplatform>=1.75.0",
+
+    # RAG / Vector Store
+    "faiss-cpu>=1.9.0",
+    "sentence-transformers>=3.4.0",
+    "chromadb>=0.6.0",
+
+    # LLM (Gemini default; Claude/OpenAI/Llama via optional deps)
+    "google-generativeai>=0.8.0",
+
+    # API Server
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.34.0",
+    "python-multipart>=0.0.18",
+
+    # Experiment Tracking
+    "wandb>=0.19.0",
+
+    # Configuration
+    "pyyaml>=6.0.0",
+    "pydantic>=2.10.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3.0",
+    "pytest-cov>=6.0.0",
+    "ruff>=0.9.0",
+    "mypy>=1.14.0",
+    "pre-commit>=4.0.0",
+]
+gpu = [
+    "faiss-gpu>=1.9.0",
+]
+claude = [
+    "anthropic>=0.40.0",
+]
+openai = [
+    "openai>=1.50.0",
+]
+llama = [
+    "openai>=1.50.0",  # Ollama uses OpenAI-compatible API
+]
+all-llms = [
+    "anthropic>=0.40.0",
+    "openai>=1.50.0",
+]
+
+[project.scripts]
+phytoveda-train = "phytoveda.training.trainer:main"
+phytoveda-infer = "phytoveda.api.server:main"
+
+[tool.ruff]
+target-version = "py314"
+line-length = 100
+src = ["src"]
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "UP",   # pyupgrade
+    "B",    # flake8-bugbear
+    "SIM",  # flake8-simplify
+]
+ignore = [
+    "E741",  # Allow short variable names common in ML code
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["phytoveda"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-v --tb=short"
+
+[tool.mypy]
+python_version = "3.14"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/phytoveda"]

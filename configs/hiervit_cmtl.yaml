@@ -1,0 +1,97 @@
+# PhytoVeda Model & Training Configuration
+# HierViT with Conditional Multi-Task Learning (CMTL)
+
+# Model Architecture
+model:
+  backbone: "vit_huge_patch14_dinov2.lvd142m"  # DINOv2 pretrained ViT-Huge
+  pretrained: true
+  image_size: 512
+  species_hidden_dim: 1024
+  pathology_hidden_dim: 512
+  dropout: 0.3
+
+# Classification Heads
+species:
+  num_classes: 147  # Initial: unique species across all 6 datasets (expandable to 8000+)
+
+pathology:
+  num_classes: 8  # Healthy, Bacterial Spot, Shot Hole, Powdery Mildew, Yellow Leaf, N-Def, K-Def, Unhealthy
+  classes:
+    - "Healthy"
+    - "Bacterial Spot"
+    - "Shot Hole"
+    - "Powdery Mildew"
+    - "Yellow Leaf Disease"
+    - "Nitrogen Deficiency"
+    - "Potassium Deficiency"
+    - "Unhealthy"
+
+# Loss Function: L_total(t) = w_species(t) * L_species + w_disease(t) * L_disease + lambda * L_reg
+loss:
+  focal_gamma: 2.0               # Focal loss gamma for pathology head
+  focal_alpha: null               # Per-class weights (null = uniform, set per dataset)
+  reg_lambda: 0.01                # Regularization coefficient
+  weighting_temperature: 2.0      # Dynamic Weight Average temperature
+  weighting_strategy: "dwa"       # Options: dwa, gradnorm, uncertainty
+
+# Training
+training:
+  epochs: 100
+  batch_size: 16
+  learning_rate: 1.0e-4
+  weight_decay: 0.01
+  grad_clip_max_norm: 1.0
+  scheduler: "cosine"             # Options: cosine, onecycle
+  warmup_epochs: 5
+  mixed_precision: true
+
+# Data
+data:
+  image_size: 512
+  train_split: 0.70
+  val_split: 0.15
+  test_split: 0.15
+  num_workers: 8                  # Tune for free-threaded Python 3.14
+  pin_memory: true
+  datasets:
+    - herbify
+    - assam
+    - medleafx
+    - cimpd
+    - simp
+    - earlynsd
+
+# Augmentation (applied on-the-fly during training)
+augmentation:
+  random_crop_scale: [0.7, 1.0]
+  horizontal_flip_prob: 0.5
+  rotation_90_prob: 0.5
+  rotation_limit: 45
+  color_jitter:
+    brightness: 0.3
+    contrast: 0.3
+    saturation: 0.3
+    hue: 0.1
+  gaussian_noise_prob: 0.2
+  gaussian_blur_prob: 0.1
+  affine_prob: 0.3
+
+# Checkpointing
+checkpoint:
+  dir: "checkpoints"              # Local; also synced to gs://phytoveda-checkpoints/
+  save_top_k: 3
+  monitor: "avg_f1"               # Gate on average F1 across both heads
+
+# Experiment Tracking
+tracking:
+  backend: "wandb"                # Options: wandb, tensorboard
+  project: "phytoveda"
+  run_name: null                  # Auto-generated if null
+
+# Active Learning
+active_learning:
+  confidence_threshold: 0.5
+  margin_threshold: 0.1
+  entropy_threshold: 2.0
+  quarantine_bucket: "gs://phytoveda-quarantine/"
+  oracle: "gemini-1.5-pro"       # LLM oracle model
