@@ -8,15 +8,10 @@ version = "0.1.0"
 description = "Multimodal Pharmacognosy: AI-Driven Botanical Identification and Textual Mapping in Ayurveda"
 readme = "README.md"
 license = { text = "MIT" }
-requires-python = ">=3.14"
+requires-python = ">=3.11"
 authors = [
     { name = "Arunbh Yashaswi" },
 ]
-
-[project.urls]
-Homepage = "https://github.com/kautilyaa/PhytoVeda"
-Repository = "https://github.com/kautilyaa/PhytoVeda"
-Issues = "https://github.com/kautilyaa/PhytoVeda/issues"
 dependencies = [
     # Deep Learning
     "torch>=2.6.0",
@@ -58,6 +53,11 @@ dependencies = [
     "pydantic>=2.10.0",
 ]
 
+[project.urls]
+Homepage = "https://github.com/kautilyaa/PhytoVeda"
+Repository = "https://github.com/kautilyaa/PhytoVeda"
+Issues = "https://github.com/kautilyaa/PhytoVeda/issues"
+
 [project.optional-dependencies]
 dev = [
     "pytest>=8.3.0",
@@ -88,7 +88,7 @@ phytoveda-train = "phytoveda.training.trainer:main"
 phytoveda-infer = "phytoveda.api.server:main"
 
 [tool.ruff]
-target-version = "py314"
+target-version = "py311"
 line-length = 100
 src = ["src"]
 
@@ -115,7 +115,7 @@ pythonpath = ["src"]
 addopts = "-v --tb=short"
 
 [tool.mypy]
-python_version = "3.14"
+python_version = "3.11"
 strict = true
 warn_return_any = true
 warn_unused_configs = true
