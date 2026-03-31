@@ -5,7 +5,8 @@ Sources:
     - Assam (MED117): Mendeley Data (dtvbwrhznz/4)
     - AI-MedLeafX: Mendeley Data (zz7r5y4dc6/1)
     - CIMPD: Kaggle (cimpd dataset)
-    - SIMP: Mendeley Data (9d89vjcghv/2)
+    - SIMPD V1 (South Indian Medicinal Plants): Mendeley
+      https://data.mendeley.com/datasets/9d89vjcghv/2
     - EarlyNSD: Kaggle (raiaone/early-nutrient-stress-detection-of-plants)
 """
 
@@ -61,11 +62,14 @@ DATASET_SOURCES: dict[str, DatasetSource] = {
         description="23 species, Healthy/Unhealthy labels, unconstrained smartphone capture",
     ),
     "simp": DatasetSource(
-        name="SIMP",
+        name="SIMPD V1 (South Indian Medicinal Plants)",
         platform="mendeley",
         identifier="9d89vjcghv/2",
         expected_images=2_503,
-        description="20 species, herbs/shrubs/creepers/climbers/trees from South India",
+        description=(
+            "SIMPD V1: 2,503 wild-scene images, 20 classes (herbs, shrubs, creepers, "
+            "climbers, trees); source https://data.mendeley.com/datasets/9d89vjcghv/2"
+        ),
     ),
     "earlynsd": DatasetSource(
         name="EarlyNSD",

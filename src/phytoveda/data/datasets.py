@@ -8,7 +8,8 @@ Datasets:
     - Assam (MED117): 7,341 images, 10 classes — folder-per-species
     - AI-MedLeafX: 10,858 orig, 4 species — species/condition folders
     - CIMPD: 9,130 images, 23 species — species/{Healthy,Unhealthy} folders
-    - SIMP: 2,503 images, 20 species — folder-per-species
+    - SIMPD V1 (simp/): 2,503 images, 20 species — folder-per-species;
+      Mendeley https://data.mendeley.com/datasets/9d89vjcghv/2
     - EarlyNSD: 2,700 images, 9 classes — crop_condition folders
 """
 
@@ -173,7 +174,10 @@ def load_cimpd(root: Path) -> list[tuple[Path, str, str | None]]:
 
 
 def load_simp(root: Path) -> list[tuple[Path, str, str | None]]:
-    """SIMP: data/simp/<species_name>/*.jpg — no pathology labels."""
+    """SIMPD V1: data/simp/<species_name>/*.jpg — no pathology labels.
+
+    Dataset: https://data.mendeley.com/datasets/9d89vjcghv/2
+    """
     samples = []
     if not root.exists():
         return samples
