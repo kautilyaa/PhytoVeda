@@ -17,6 +17,7 @@ Design:
 """
 
 from phytoveda.colab.data_cache import DatasetCache, compute_split_hash
+from phytoveda.colab.dataset_setup import print_dataset_status, setup_datasets
 from phytoveda.colab.drive import DriveManager
 from phytoveda.colab.environment import ColabEnvironment
 from phytoveda.colab.training import (
@@ -39,4 +40,6 @@ __all__ = [
     "compile_model",
     "compute_split_hash",
     "find_max_batch_size",
+    "print_dataset_status",
+    "setup_datasets",
 ]
