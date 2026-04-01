@@ -367,8 +367,10 @@ def _try_extract_local_zip(
     for search_dir in search_dirs:
         if not search_dir.exists():
             continue
-        for zpath in search_dir.iterdir():
-            if not zpath.is_file() or zpath.suffix.lower() != ".zip":
+        # Search recursively so ZIPs in subdirectories are found too
+        # (e.g. PhytoVedaData/subdir/dataset.zip)
+        for zpath in search_dir.rglob("*.zip"):
+            if not zpath.is_file():
                 continue
             fname_lower = zpath.stem.lower()
             if any(kw in fname_lower for kw in source.zip_keywords):
