@@ -268,7 +268,7 @@ oracle = LLMOracle(provider="llama")
 | Herbify | 6,104 | 91 | Healthy baselines, rich metadata |
 | Assam Medicinal Leaf Set | 7,341 | 10 | Regional morphological variance (NE India) |
 | AI-MedLeafX | 10,858 / 65,178 aug | 4 | Bacterial Spot, Shot Hole, Powdery Mildew, Yellow Leaf |
-| CIMPD | 9,130 | 23 | Healthy vs. Unhealthy (unconstrained) |
+| CIMPD | 9,130 | 23 | Leaf images, Gwalior region (unconstrained) |
 | SIMP | 2,503 | 20 | Herbs, shrubs, creepers, climbers, trees |
 | EarlyNSD | 2,700 | 3 | Nitrogen & Potassium deficiency |
 | **Total** | **~38,636 orig / 103K+ aug** | **~147 unique** | |
@@ -335,7 +335,39 @@ ruff check src/
 
 PhytoVeda has native Colab support with Google Drive persistence. Open `notebooks/phytoveda_colab.ipynb` in Colab for the full pipeline.
 
-**Storage strategy**: Datasets download to Colab SSD (`/content/`) for fast I/O. Everything else (checkpoints, results, ChromaDB, reports, quarantine) persists to Google Drive.
+**Storage strategy**: Datasets extract to Colab SSD (`/content/datasets/`) for fast I/O. Everything else (checkpoints, results, ChromaDB, reports, quarantine) persists to Google Drive.
+
+### Dataset Setup from Drive
+
+Place your dataset ZIPs in `/content/drive/MyDrive/PhytoVedaData/` — no renaming needed:
+
+```
+/content/drive/MyDrive/PhytoVedaData/
+├── MED117_Medicinal Plant Leaf Dataset & Name Table.zip   → assam/
+├── AI-MedLeafX A Large-Scale Computer Vision ...zip       → medleafx/
+├── cimpd.zip                                               → cimpd/
+├── SIMPD V1 South Indian Medicinal Plants ...zip           → simp/
+└── early_nsd_1.zip                                         → earlynsd/
+```
+
+Then in a Colab cell:
+
+```python
+from google.colab import drive
+drive.mount("/content/drive")
+
+from phytoveda.colab.dataset_setup import setup_datasets
+results = setup_datasets()
+```
+
+This automatically:
+- Matches ZIPs to datasets by keyword (e.g. `med117` → assam, `simpd` → simp)
+- Handles nested ZIPs (e.g. AI-MedLeafX contains `Original.zip` + `Augmented.zip`)
+- Flattens single top-level folders so loaders find species dirs directly
+- Falls back to remote download (GitHub / Mendeley API / kagglehub) for missing ZIPs
+- Herbify is auto-cloned from GitHub (no ZIP needed)
+
+### Drive Manager
 
 ```python
 from phytoveda.colab import DriveManager, ColabEnvironment

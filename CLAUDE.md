@@ -60,7 +60,7 @@ L_total(t) = w_species(t) * L_species + w_disease(t) * L_disease + lambda * L_re
 | **Herbify** | 6,104 | 91 species | Healthy baselines, rich metadata | Primary species classification weights |
 | **Assam Medicinal Leaf Set** | 7,341 | 10 classes | Regional morphological variance (NE India) | Prevents geographic overfitting |
 | **AI-MedLeafX** | 10,858 orig / 65,178 aug | 4 species | Bacterial Spot, Shot Hole, Powdery Mildew, Yellow Leaf | High-res disease mapping for Neem, Haritaki, Camphor, Moringa |
-| **CIMPD** | 9,130 | 23 species | Healthy vs. Unhealthy (unconstrained) | Robust feature extraction in noisy field conditions |
+| **CIMPD** | 9,130 | 23 species | Leaf images (Gwalior region) | Robust feature extraction in noisy field conditions |
 | **SIMP** | 2,503 | 20 species | Herbs, shrubs, creepers, climbers, trees | Morphological diversity beyond ovate leaves |
 | **EarlyNSD** | 2,700 | 3 species | Nitrogen & Potassium deficiency | Abiotic stress detection distinct from pathogenic infection |
 
@@ -134,7 +134,7 @@ PhytoVeda/
         augmentation.py         # Albumentations 2.0 augmentation pipeline
         preprocessing.py        # 512x512 normalization, corrupt image handling
         taxonomy.py             # SpeciesTaxonomy and PathologyMapping registries
-        download.py             # Dataset download + extraction utilities
+        download.py             # Dataset download, ZIP extraction, kagglehub + Mendeley API
       models/                   # HierViT, CMTL heads, loss functions
         backbone.py             # HierViT from timm (DINOv2/ViT-Huge)
         heads.py                # Species (softmax/CE) + Pathology (focal loss) heads
@@ -169,6 +169,7 @@ PhytoVeda/
         environment.py          # ColabEnvironment: GPU, packages, free-threading
         training.py             # ColabTrainer, grad accum, crash ckpt, GPU monitor, auto batch
         data_cache.py           # DatasetCache: splits, taxonomy, history, download tracking
+        dataset_setup.py        # Drive ZIP extraction, nested ZIP handling, setup_datasets()
   tests/
     test_data.py                # 76 tests — data pipeline, taxonomy, augmentation
     test_models.py              # Model architecture tests
@@ -214,6 +215,10 @@ python -m phytoveda.training.trainer --config configs/hiervit_cmtl.yaml --resume
 # Launch inference API server
 python -m phytoveda.api.server --checkpoint checkpoints/best_model.pt
 python -m phytoveda.api.server --checkpoint checkpoints/best_model.pt --chromadb-dir data/chromadb --gemini-api-key $KEY
+
+# Download datasets (CLI — scans for local ZIPs before downloading)
+python -m phytoveda.data.download --data-root data
+python -m phytoveda.data.download --data-root data --zip-dir /path/to/zips
 
 # Run tests
 pytest tests/ -v
