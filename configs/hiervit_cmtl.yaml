@@ -3,7 +3,7 @@
 
 # Model Architecture
 model:
-  backbone: "vit_huge_patch14_dinov2.lvd142m"  # DINOv2 pretrained ViT-Huge
+  backbone: "vit_large_patch14_dinov2"  # DINOv2 pretrained ViT-Large (use vit_giant_patch14_dinov2 for max accuracy)
   pretrained: true
   image_size: 512
   species_hidden_dim: 1024
